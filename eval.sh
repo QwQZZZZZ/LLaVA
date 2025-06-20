@@ -11,17 +11,17 @@
 # a100gpu003,l40gpu001
 
 # ==== 设置环境变量 ====
-export PYTHONPATH="/lab/zhangjg_lab/30028000/llava:$PYTHONPATH"
-export PATH="/lab/zhangjg_lab/30028000/.conda/envs/llava/bin:$PATH"
+#export PYTHONPATH="/lab/zhangjg_lab/30028000/llava:$PYTHONPATH"
+#export PATH="/lab/zhangjg_lab/30028000/.conda/envs/llava/bin:$PATH"
 nvidia-smi
 # ==== 调试信息 ====
 echo "Python 路径: $(which python)"
 
-python eval.py \
-    --model-path /lab/zhangjg_lab/30028000/llava/models/llava-v1.5-7b \
+python eval_me.py \
+    --model-path /lab/zhangjg_lab/30028000/llava/checkpoints/llava-v1.5-resnet50-lora-coco-caption-test \
+    --model-base /lab/zhangjg_lab/30028000/llava/models/llava-v1.5-7b \
     --coco-val-annotations-file /lab/zhangjg_lab/30028000/llava/data/coco/annotations/captions_val2014.json \
     --image-folder /lab/zhangjg_lab/30028000/llava/data/coco/val2014 \
-    --num-test-images 3200 # 你可以调整测试图片数量
 
 
 echo "LLaVA LoRA 微调测试结束。"
