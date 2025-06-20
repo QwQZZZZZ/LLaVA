@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -o llava.%j.out               # 脚本执行的输出将被保存在 llava.%j.out文件下，%j表示作业号
-#SBATCH --partition=l40s
-#SBATCH --qos=dcgpu                    # 指定作业的 QOS
+#SBATCH --partition=a100
+#SBATCH --qos=a100                    # 指定作业的 QOS
 #SBATCH -J llava                      # 作业在调度系统中的作业名为 llava
 #SBATCH --nodes=1                     # 申请节点数为 1
 #SBATCH --ntasks-per-node=1           # 每个节点上运行的任务数为 4
@@ -98,8 +98,7 @@ deepspeed llava/train/train_mem.py \
     --per_device_eval_batch_size 4 \
     --gradient_accumulation_steps $GRADIENT_ACCUMULATION_STEPS \
     --evaluation_strategy "no" \
-    --save_strategy "steps" \
-    --save_steps 50000 \
+    --save_strategy "epoch" \
     --save_total_limit 1 \
     --learning_rate 2e-4 \
     --weight_decay 0. \
