@@ -30,6 +30,8 @@ class LlavaMetaModel:
 
     def __init__(self, config):
         super(LlavaMetaModel, self).__init__(config)
+        self.linear_layer = nn.Linear(in_features=2048, out_features=1024)
+
 
         if hasattr(config, "mm_vision_tower"):
             self.vision_tower = build_vision_tower(config, delay_load=True)
@@ -68,6 +70,18 @@ class LlavaMetaModel:
             else:
                 vision_tower = self.vision_tower
             vision_tower.load_model()
+
+        # --- START OF MODIFICATION ---
+        # 确保 linear_layer 也在正确的设备和数据类型上
+        # self.device 和 self.dtype 应该会在此时被父类或 DeepSpeed 设置为正确的值
+        if hasattr(self, 'linear_layer'):  # 确保 linear_layer 存在
+            # 这里的 self.device 和 self.dtype 会从 LlavaLlamaModel 继承过来
+            # 这个时候模型应该已经加载，并且 DeepSpeed 应该已经设定了设备
+            self.linear_layer.to(self.dtype)
+            # 将其明确发送到模型当前所在的设备
+            # self.device 会是 "cuda:0" 或其他被 DeepSpeed 选中的设备
+            self.linear_layer.to(self.device)
+        # --- END OF MODIFICATION ---
 
         self.config.use_mm_proj = True
         self.config.mm_projector_type = getattr(model_args, 'mm_projector_type', 'linear')
@@ -129,6 +143,10 @@ def unpad_image(tensor, original_size):
 
 
 class LlavaMetaForCausalLM(ABC):
+    def __init__(self, config):
+        # 重要的：首先调用父类的 __init__
+        super().__init__(config)
+
 
     @abstractmethod
     def get_model(self):
@@ -139,6 +157,11 @@ class LlavaMetaForCausalLM(ABC):
 
     def encode_images(self, images):
         image_features = self.get_model().get_vision_tower()(images)
+        # self.get_model().linear_layer.to(self.dtype)  # 确保数据类型一致，通常是 bf16 或 fp16
+        # self.get_model().linear_layer.to(self.device)
+        # print(image_features.size())
+        image_features = self.get_model().linear_layer(image_features)
+        # print(image_features.size())
         image_features = self.get_model().mm_projector(image_features)
         return image_features
 

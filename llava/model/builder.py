@@ -154,7 +154,7 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
 
         vision_tower = model.get_vision_tower()
         if not vision_tower.is_loaded:
-            vision_tower.load_model(device_map=device_map)
+            vision_tower.load_model()
         if device_map != 'auto':
             vision_tower.to(device=device_map, dtype=torch.float16)
         image_processor = vision_tower.image_processor
@@ -163,5 +163,19 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
         context_len = model.config.max_sequence_length
     else:
         context_len = 2048
+
+    model = model.to(device)
+
+    if hasattr(model, 'get_vision_tower'):
+        vt = model.get_vision_tower()
+        if hasattr(vt, 'to'):
+            vt.to(device=device, dtype=torch.float16)
+
+    # mm_projector & linear_layer
+    if hasattr(model, 'linear_layer'):
+        model.linear_layer.to(device=device, dtype=torch.float16)
+
+    if hasattr(model, 'mm_projector'):
+        model.mm_projector.to(device=device, dtype=torch.float16)
 
     return tokenizer, model, image_processor, context_len

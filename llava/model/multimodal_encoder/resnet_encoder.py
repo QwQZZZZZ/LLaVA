@@ -26,7 +26,7 @@ class ResNetVisionTower(nn.Module):
         else:
             self.cfg_only = AutoConfig.from_pretrained(self.vision_tower_name)
 
-    def load_model(self, device_map=None):
+    def load_model(self):
         if self.is_loaded:
             print(f'{self.vision_tower_name} is already loaded, `load_model` called again, skipping.')
             return
@@ -35,7 +35,7 @@ class ResNetVisionTower(nn.Module):
         # 使用 AutoImageProcessor 和 AutoModel 加载
         self.image_processor = AutoImageProcessor.from_pretrained(self.vision_tower_name)
         # 我们需要模型输出中间层的特征图(hidden_states)
-        self.vision_tower = AutoModel.from_pretrained(self.vision_tower_name, device_map=device_map,
+        self.vision_tower = AutoModel.from_pretrained(self.vision_tower_name,
                                                       output_hidden_states=True)
         self.vision_tower.requires_grad_(False)  # 默认冻结
 
