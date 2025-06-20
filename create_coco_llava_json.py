@@ -53,7 +53,7 @@ for ann in annotations:
         "conversations": [
             {
                 "from": "human",
-                "value": "<image>\n请为这张图片生成一句描述。"  # <image>是特殊占位符
+                "value": "<image>\nPlease generate a caption for this image."  # <image>是特殊占位符
             },
             {
                 "from": "gpt",
